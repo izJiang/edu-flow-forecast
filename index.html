@@ -352,7 +352,7 @@ function renderChart(track) {
   }, false);
 }
 
-function switchTrack(name) {
+function switchTrack(el, name) {
   currentTrack = name;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.track === name));
   renderChart(name);
