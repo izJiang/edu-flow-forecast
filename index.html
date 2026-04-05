@@ -36,7 +36,7 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .section-title::before { content:''; display:block; width:4px; height:18px; background:#FF2442; border-radius:2px; }
 
 .card { background:#fff; border-radius:16px; padding:12px 16px; box-shadow:0 2px 16px rgba(0,0,0,0.06); }
-.chart-box { height:460px; transition: opacity 0.25s ease; }
+.chart-box { height:460px; }
 
 /* 同比（月环比） */
 .yoy-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
@@ -356,12 +356,7 @@ function renderChart(track) {
 function switchTrack(name) {
   currentTrack = name;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.track === name));
-  const box = document.getElementById('chart1');
-  box.style.opacity = '0';
-  setTimeout(function() {
-    renderChart(name);
-    box.style.opacity = '1';
-  }, 180);
+  renderChart(name);
   renderContent(name);
   renderTiming(name);
   renderIntel(name);
