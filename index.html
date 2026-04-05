@@ -79,14 +79,11 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .tag { display:inline-block; background:#fff0f2; color:#FF2442; padding:4px 12px; border-radius:999px; font-size:12px; margin:3px; }
 
 
-/* 内容推荐 */
-.content-rec-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-.content-rec-card { background:#fff; border-radius:14px; padding:18px; box-shadow:0 2px 10px rgba(0,0,0,0.06); }
-.content-rec-card .rec-tag { display:inline-block; background:#fff0f2; color:#FF2442; border:1px solid #ffcdd3; padding:3px 10px; border-radius:999px; font-size:11px; margin-bottom:8px; font-weight:600; }
-.content-rec-card .rec-title { font-size:14px; font-weight:700; color:#1a1a1a; margin-bottom:6px; line-height:1.5; }
-.content-rec-card .rec-desc { font-size:12px; color:#888; line-height:1.7; margin-bottom:10px; }
-.content-rec-card .rec-link { display:inline-block; font-size:12px; color:#FF2442; text-decoration:none; font-weight:500; }
-.content-rec-card .rec-link:hover { text-decoration:underline; }
+/* 内容推荐-搜索词标签云 */
+.kw-note { font-size:12px; color:#aaa; margin-bottom:12px; }
+.kw-tags { display:flex; flex-wrap:wrap; gap:8px; }
+.kw-tag { display:inline-block; background:#fff; color:#FF2442; border:1.5px solid #ffcdd3; padding:6px 14px; border-radius:999px; font-size:13px; font-weight:500; text-decoration:none; transition:all 0.18s; }
+.kw-tag:hover { background:#FF2442; color:#fff; border-color:#FF2442; }
 /* 图表说明 */
 .chart-note { font-size:12px; color:#999; margin-top:10px; padding:10px 14px; background:#fafafa; border-radius:8px; line-height:1.7; border-left:3px solid #e0d8d5; }
 .chart-note b { color:#666; }
@@ -142,7 +139,7 @@ footer a:hover { text-decoration:underline; }
       <div class="section-title">流量趋势预测</div>
       <div class="card"><div id="chart1" class="chart-box"></div></div>
       <div class="chart-note">
-        💡 各赛道 Y 轴独立，绝对数值<b>不可跨赛道比较</b>。跨赛道流量对比看下方「赛道热度排行」。
+        💡 各赛道 Y 轴独立，绝对数值<b>不可跨赛道比较</b>。
       </div>
     </div>
 
@@ -152,13 +149,8 @@ footer a:hover { text-decoration:underline; }
     </div>
 
     <div class="section">
-      <div class="section-title">赛道热度排行</div>
-      <div class="heat-grid" id="heatGrid"></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">本月内容方向推荐</div>
-      <div id="contentRec" class="content-rec-grid"></div>
+      <div class="section-title">用户热搜词 · 内容选题参考</div>
+      <div id="contentRec"></div>
     </div>
 
     <div class="section">
@@ -376,46 +368,7 @@ function renderYOY() {
   }).join('');
 }
 
-function renderHeat() {
-  // 流量增速排行（用实际yoy）+ 环比排行
-  const tracks = Object.keys(REAL_DATA);
-  const byYoy = [...tracks].sort((a,b)=>REAL_DATA[b].yoy - REAL_DATA[a].yoy);
-  const maxYoy = REAL_DATA[byYoy[0]].yoy;
-
-  const byMom = [...tracks].sort((a,b)=>calcMoM(REAL_DATA[b]).pct - calcMoM(REAL_DATA[a]).pct);
-  const maxMom = Math.abs(calcMoM(REAL_DATA[byMom[0]]).pct);
-
-  const rankClass = i => i===0?'':'rank'+(i===1?'2':i===2?'3':'N');
-
-  const yoyRows = byYoy.map((name,i) => {
-    const yoy = REAL_DATA[name].yoy;
-    const w = Math.round(Math.abs(yoy)/maxYoy*100);
-    return '<div class="heat-row">'
-      + '<div class="heat-rank ' + rankClass(i) + '">' + (i+1) + '</div>'
-      + '<div class="heat-name">' + name + '</div>'
-      + '<div class="heat-bar-wrap"><div class="heat-bar" style="width:' + w + '%"></div></div>'
-      + '<div class="heat-val">+' + yoy + '%</div>'
-      + '</div>';
-  }).join('');
-
-  const momRows = byMom.map((name,i) => {
-    const mom = calcMoM(REAL_DATA[name]);
-    const w = maxMom>0?Math.round(Math.abs(mom.pct)/maxMom*100):0;
-    const sign = mom.pct>=0?'+':'';
-    const barBg = mom.pct<0?'linear-gradient(90deg,#aaa,#ccc)':'linear-gradient(90deg,#FF2442,#ff7875)';
-    const valColor = mom.pct>=0?'#FF2442':'#aaa';
-    return '<div class="heat-row">'
-      + '<div class="heat-rank ' + rankClass(i) + '">' + (i+1) + '</div>'
-      + '<div class="heat-name">' + name + '</div>'
-      + '<div class="heat-bar-wrap"><div class="heat-bar" style="width:' + w + '%;background:' + barBg + '"></div></div>'
-      + '<div class="heat-val" style="color:' + valColor + '">' + sign + mom.pct + '%</div>'
-      + '</div>';
-  }).join('');
-
-  document.getElementById('heatGrid').innerHTML =
-    '<div class="heat-card"><h4>📈 同比增速排行（vs 2025同期）</h4>' + yoyRows + '</div>'
-    + '<div class="heat-card"><h4>🔄 近期环比排行（近期 vs 早期）</h4>' + momRows + '</div>';
-}
+function renderHeat() { /* removed */ }
 
 function renderTiming(track) {
   const d = REAL_DATA[track];
@@ -453,60 +406,17 @@ function renderIntel(track) {
   `;
 }
 
-const contentRecs = {
-  'K12学科辅导': [
-    {tag:'冲刺干货', title:'期中考试高分技巧', kw:'期中考试技巧'},
-    {tag:'择校攻略', title:'机构选择避坑指南', kw:'学科辅导机构怎么选'},
-    {tag:'家长干货', title:'孩子成绩下滑怎么办', kw:'孩子成绩下滑'},
-  ],
-  '大语文': [
-    {tag:'阅读推荐', title:'世界读书日书单合辑', kw:'世界读书日书单'},
-    {tag:'写作提升', title:'作文高分句式收藏', kw:'小学作文高分句式'},
-    {tag:'古诗文', title:'期中必背古诗文速记', kw:'小学古诗文速记'},
-  ],
-  'STEM': [
-    {tag:'竞赛备战', title:'蓝桥杯备考经验分享', kw:'蓝桥杯备考'},
-    {tag:'编程入门', title:'少儿编程怎么入门', kw:'少儿编程入门'},
-    {tag:'科学实验', title:'在家做的有趣科学实验', kw:'亲子科学实验'},
-  ],
-  '素质教育': [
-    {tag:'艺术启蒙', title:'孩子学画画/钢琴哪个好', kw:'孩子学才艺选择'},
-    {tag:'演出攻略', title:'春季汇演穿搭造型', kw:'儿童演出穿搭'},
-    {tag:'兴趣培养', title:'如何找到孩子的兴趣点', kw:'如何培养孩子兴趣'},
-  ],
-  '英语/语言': [
-    {tag:'口语提升', title:'英语口语速成30天', kw:'英语口语30天'},
-    {tag:'考试攻略', title:'KET/PET高分备考路线', kw:'KET备考攻略'},
-    {tag:'绘本推荐', title:'英文绘本分级推荐', kw:'英文绘本分级'},
-  ],
-  '教辅工具': [
-    {tag:'工具测评', title:'学习机器人横评2026', kw:'学习机器人推荐'},
-    {tag:'效率方法', title:'错题本怎么做才有用', kw:'错题本方法'},
-    {tag:'文具好物', title:'五一囤货文具清单', kw:'文具好物推荐'},
-  ],
-  '考研': [
-    {tag:'复试冲刺', title:'复试英语口试高频题', kw:'考研复试英语口试'},
-    {tag:'院校选择', title:'调剂院校信息汇总', kw:'考研调剂院校2026'},
-    {tag:'备考规划', title:'2027考研备考时间线', kw:'2027考研备考计划'},
-  ],
-  '公考/事业编': [
-    {tag:'笔试冲刺', title:'行测数量关系快速解题', kw:'行测数量关系技巧'},
-    {tag:'省考备战', title:'省考真题刷题规划', kw:'省考真题刷题'},
-    {tag:'上岸经验', title:'半年上岸公务员经验', kw:'公务员考试上岸经验'},
-  ],
-};
+const searchKeywords = {"K12学科辅导":["高考历史 难度","全国各地高考作文题来了","思维导图","高考","高考数学 难不难","高考语文","高考数学","幼小衔接","写信格式","中国小孩正在全世界写暑假作业","过秦论","一年级","跳蚤市场摊位牌","对联左右区分上下联","绿豆芽观察日记","我有一个想法三年级作文","阅兵观后感","第二类我","数字1到10书写","林黛玉被上海交大录取了"],"STEM":["米吴科学小实验","科学小实验小班","科技小发明","幼儿园科学小实验","scratch少儿编程","少儿编程","科学小实验幼儿园大班","小班科学小实验","斯坦星球","数学思维网课哪个最好","编程几岁开始学最好","豌豆思维","小班科学","科学小实验托班","大班科学小实验","中班科学小实验","科学科学小实验","童程童美","少儿编程课有必要学吗","小实验科学小实验"],"考研":["考研","考研成绩2026","考研出分","考研政治","考研成绩","考研时间","考研英语","考研预报名","考研报名时间","研究生","考研什么时候出成绩","考研怎么确定学校和专业","考研政治怎么备考","考研搭子","考研机构","考研国家线","2026考研成绩查询","最新考研报名人数出炉","考研结束","考研报名"],"公考/事业编":["军队文职","考公","教资面试","教资","教资报名2026上半年","教师资格证","省考","申论","事业编","面试常见问题及回答技巧","广东省考","国考","教资考试时间","教资2025下半年","结构化面试","资料分析","资料分析公式大全","省考考试时间","考公怎么备考","国考出成绩时间"],"教辅工具":["小天才电话手表","学而思学习机","jojo点读笔","毛毛虫点读笔","学习机","科大讯飞学习机","华为儿童手表","学而思学习机有必要买吗","希沃学习机","小蝌蚪点读笔","斑马思维机","四级听力怎么练","学而思学习机型号对比","雅思听力评分对照表","早教机","四六级听力邪修","摩比思维机","小猿学练机","大满贯","科大讯飞学习机各型号对比"],"英语/语言":["英语启蒙","小猪佩奇英语版","英语启蒙规划路线","剑桥少儿英语","斑马英语启蒙","英语启蒙动画片","幼儿英语","儿童英语","启蒙英语","英语启蒙磨耳朵","英文动画片启蒙","幼儿英语启蒙怎么教","少儿英语","英语动画片启蒙","宝宝学英语","幼儿园英语","早教英语启蒙儿歌","raz买哪个版本推荐","亚克迪英语启蒙","少儿英语启蒙动画"],"素质教育":["折纸小手工","创意美术","书法","胎教音乐","动物简笔画","哪吒简笔画","硬笔书法作品","行楷","折纸教程","小班创意美术","奥尔夫音乐律动","大班创意美术","马的简笔画","中班创意美术","简笔画小动物","简笔画幼儿","隶书","毛笔字","幼儿舞蹈","婴儿早教音乐"],"大语文":["作文","全国各地高考作文题来了","语文阅读答题技巧","高考语文","唐诗三百首","成长类作文","三年级上册语文","二年级上册语文","高考作文","高一语文必背古诗词","识字小报","一年级上册语文","我的心爱之物作文五年级","我有一个想法三年级作文","我的拿手好戏作文","阅读理解的技巧和方法","语文","推荐一个好地方作文四年级","家乡的风俗作文","我的植物朋友三年级作文"]};
 
 function renderContent(track) {
-  const recs = contentRecs[track] || [];
-  document.getElementById('contentRec').innerHTML = recs.map(r => {
-    const url = 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(r.kw) + '&source=web_search_result_notes';
-    return '<div class="content-rec-card">'
-      + '<div class="rec-tag">' + r.tag + '</div>'
-      + '<div class="rec-title">' + r.title + '</div>'
-      + '<div class="rec-desc">点击查看小红书相关内容 →</div>'
-      + '<a class="rec-link" href="' + url + '" target="_blank">🔍 搜「' + r.kw + '」</a>'
-      + '</div>';
+  const kws = searchKeywords[track] || [];
+  const items = kws.slice(0, 15).map(kw => {
+    const url = 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(kw) + '&source=web_search_result_notes';
+    return '<a class="kw-tag" href="' + url + '" target="_blank">' + kw + '</a>';
   }).join('');
+  document.getElementById('contentRec').innerHTML =
+    '<div class="kw-note">以下为该赛道用户真实高热搜索词（来源：灵犀 Top1000），点击直达小红书搜索结果</div>'
+    + '<div class="kw-tags">' + items + '</div>';
 }
 
 // ── 导入 CSV ──
