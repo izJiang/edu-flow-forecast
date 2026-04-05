@@ -354,7 +354,8 @@ function renderChart(track) {
 
 function switchTrack(el, name) {
   currentTrack = name;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.track === name));
+  document.querySelectorAll('.track-btn').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
   renderChart(name);
   renderContent(name);
   renderTiming(name);
