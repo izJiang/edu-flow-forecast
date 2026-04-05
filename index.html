@@ -35,8 +35,8 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .section-title { font-size:16px; font-weight:700; color:#1a1a1a; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
 .section-title::before { content:''; display:block; width:4px; height:18px; background:#FF2442; border-radius:2px; }
 
-.card { background:#fff; border-radius:16px; padding:16px 20px; box-shadow:0 2px 16px rgba(0,0,0,0.06); }
-.chart-box { height:420px; }
+.card { background:#fff; border-radius:16px; padding:12px 16px; box-shadow:0 2px 16px rgba(0,0,0,0.06); }
+.chart-box { height:460px; }
 
 /* 同比（月环比） */
 .yoy-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
@@ -79,11 +79,7 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .tag { display:inline-block; background:#fff0f2; color:#FF2442; padding:4px 12px; border-radius:999px; font-size:12px; margin:3px; }
 
 
-/* 内容推荐-搜索词标签云 */
-.kw-note { font-size:12px; color:#aaa; margin-bottom:12px; }
-.kw-tags { display:flex; flex-wrap:wrap; gap:8px; }
-.kw-tag { display:inline-block; background:#fff; color:#FF2442; border:1.5px solid #ffcdd3; padding:6px 14px; border-radius:999px; font-size:13px; font-weight:500; text-decoration:none; transition:all 0.18s; }
-.kw-tag:hover { background:#FF2442; color:#fff; border-color:#FF2442; }
+
 /* 图表说明 */
 .chart-note { font-size:12px; color:#999; margin-top:10px; padding:10px 14px; background:#fafafa; border-radius:8px; line-height:1.7; border-left:3px solid #e0d8d5; }
 .chart-note b { color:#666; }
@@ -146,11 +142,6 @@ footer a:hover { text-decoration:underline; }
     <div class="section">
       <div class="section-title">同比上月</div>
       <div class="yoy-grid" id="yoyGrid"></div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">用户热搜词 · 内容选题参考</div>
-      <div id="contentRec"></div>
     </div>
 
     <div class="section">
@@ -295,6 +286,7 @@ function renderChart(track) {
       }
     },
     legend:{ data:['2025同期','2026实际','2026预测'], top:6, textStyle:{fontSize:12} },
+    grid:{ top:36, bottom:52, left:12, right:12, containLabel:true },
     xAxis:{
       type:'category', data:allDates,
       axisLabel:{ fontSize:11, interval:4, color:'#555' },
@@ -351,7 +343,6 @@ function switchTrack(btn, track) {
   btn.classList.add('active');
   currentTrack = track;
   renderChart(track);
-  renderContent(track);
   renderTiming(track);
   renderIntel(track);
 }
@@ -406,18 +397,7 @@ function renderIntel(track) {
   `;
 }
 
-const searchKeywords = {"K12学科辅导":["高考历史 难度","全国各地高考作文题来了","思维导图","高考","高考数学 难不难","高考语文","高考数学","幼小衔接","写信格式","中国小孩正在全世界写暑假作业","过秦论","一年级","跳蚤市场摊位牌","对联左右区分上下联","绿豆芽观察日记","我有一个想法三年级作文","阅兵观后感","第二类我","数字1到10书写","林黛玉被上海交大录取了"],"STEM":["米吴科学小实验","科学小实验小班","科技小发明","幼儿园科学小实验","scratch少儿编程","少儿编程","科学小实验幼儿园大班","小班科学小实验","斯坦星球","数学思维网课哪个最好","编程几岁开始学最好","豌豆思维","小班科学","科学小实验托班","大班科学小实验","中班科学小实验","科学科学小实验","童程童美","少儿编程课有必要学吗","小实验科学小实验"],"考研":["考研","考研成绩2026","考研出分","考研政治","考研成绩","考研时间","考研英语","考研预报名","考研报名时间","研究生","考研什么时候出成绩","考研怎么确定学校和专业","考研政治怎么备考","考研搭子","考研机构","考研国家线","2026考研成绩查询","最新考研报名人数出炉","考研结束","考研报名"],"公考/事业编":["军队文职","考公","教资面试","教资","教资报名2026上半年","教师资格证","省考","申论","事业编","面试常见问题及回答技巧","广东省考","国考","教资考试时间","教资2025下半年","结构化面试","资料分析","资料分析公式大全","省考考试时间","考公怎么备考","国考出成绩时间"],"教辅工具":["小天才电话手表","学而思学习机","jojo点读笔","毛毛虫点读笔","学习机","科大讯飞学习机","华为儿童手表","学而思学习机有必要买吗","希沃学习机","小蝌蚪点读笔","斑马思维机","四级听力怎么练","学而思学习机型号对比","雅思听力评分对照表","早教机","四六级听力邪修","摩比思维机","小猿学练机","大满贯","科大讯飞学习机各型号对比"],"英语/语言":["英语启蒙","小猪佩奇英语版","英语启蒙规划路线","剑桥少儿英语","斑马英语启蒙","英语启蒙动画片","幼儿英语","儿童英语","启蒙英语","英语启蒙磨耳朵","英文动画片启蒙","幼儿英语启蒙怎么教","少儿英语","英语动画片启蒙","宝宝学英语","幼儿园英语","早教英语启蒙儿歌","raz买哪个版本推荐","亚克迪英语启蒙","少儿英语启蒙动画"],"素质教育":["折纸小手工","创意美术","书法","胎教音乐","动物简笔画","哪吒简笔画","硬笔书法作品","行楷","折纸教程","小班创意美术","奥尔夫音乐律动","大班创意美术","马的简笔画","中班创意美术","简笔画小动物","简笔画幼儿","隶书","毛笔字","幼儿舞蹈","婴儿早教音乐"],"大语文":["作文","全国各地高考作文题来了","语文阅读答题技巧","高考语文","唐诗三百首","成长类作文","三年级上册语文","二年级上册语文","高考作文","高一语文必背古诗词","识字小报","一年级上册语文","我的心爱之物作文五年级","我有一个想法三年级作文","我的拿手好戏作文","阅读理解的技巧和方法","语文","推荐一个好地方作文四年级","家乡的风俗作文","我的植物朋友三年级作文"]};
 
-function renderContent(track) {
-  const kws = searchKeywords[track] || [];
-  const items = kws.slice(0, 15).map(kw => {
-    const url = 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(kw) + '&source=web_search_result_notes';
-    return '<a class="kw-tag" href="' + url + '" target="_blank">' + kw + '</a>';
-  }).join('');
-  document.getElementById('contentRec').innerHTML =
-    '<div class="kw-note">以下为该赛道用户真实高热搜索词（来源：灵犀 Top1000），点击直达小红书搜索结果</div>'
-    + '<div class="kw-tags">' + items + '</div>';
-}
 
 // ── 导入 CSV ──
 function handleCSVFile(file) {
@@ -567,7 +547,7 @@ async function loadFromSupabase() {
     REAL_DATA = FALLBACK_DATA;
     src && (src.textContent = '📦 内置数据');
   }
-  initChart(); renderYOY(); renderHeat(); renderContent(currentTrack); renderTiming(currentTrack); renderIntel(currentTrack);
+  initChart(); renderYOY(); renderHeat(); renderTiming(currentTrack); renderIntel(currentTrack);
 }
 
 // ── 上传行到 Supabase ──
