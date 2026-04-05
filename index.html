@@ -288,7 +288,6 @@ function renderChart(track) {
   });
 
   chart1.setOption({
-    animation: false,
     tooltip:{
       trigger:'axis',
       formatter: params => {
@@ -350,7 +349,7 @@ function renderChart(track) {
         }
       }
     ]
-  }, true);
+  }, false);
 }
 
 function switchTrack(name) {
