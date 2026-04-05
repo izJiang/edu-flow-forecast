@@ -78,6 +78,10 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .intel-quote { margin-top:14px; padding:12px 16px; background:#fff8f0; border-radius:10px; font-size:13px; color:#666; line-height:1.8; border-left:3px solid #FF2442; }
 .tag { display:inline-block; background:#fff0f2; color:#FF2442; padding:4px 12px; border-radius:999px; font-size:12px; margin:3px; }
 
+/* 图表说明 */
+.chart-note { font-size:12px; color:#999; margin-top:10px; padding:10px 14px; background:#fafafa; border-radius:8px; line-height:1.7; border-left:3px solid #e0d8d5; }
+.chart-note b { color:#666; }
+
 /* 导入弹窗 */
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; align-items:center; justify-content:center; }
 .modal-overlay.show { display:flex; }
@@ -119,7 +123,7 @@ footer a:hover { text-decoration:underline; }
     <button class="track-btn" onclick="switchTrack(this,'考研')">考研</button>
     <button class="track-btn" onclick="switchTrack(this,'公考/事业编')">公考/事业编</button>
     <div class="action-btns">
-      <button class="btn-action btn-import" onclick="document.getElementById('modalImport').classList.add('show')">📂 导入数据</button>
+      <button class="btn-action btn-import" onclick="checkImportAuth()">📂 导入数据</button>
       <button class="btn-action btn-download-img" onclick="downloadLongImage()">⬇ 下载长图</button>
     </div>
   </div>
@@ -128,6 +132,11 @@ footer a:hover { text-decoration:underline; }
     <div class="section">
       <div class="section-title">流量趋势预测</div>
       <div class="card"><div id="chart1" class="chart-box"></div></div>
+      <div class="chart-note">
+        💡 <b>阅读说明：</b>各赛道 Y 轴范围独立自适应，切换赛道时绝对数值不可直接比较大小——
+        这是正常现象，因为不同赛道的消耗体量本身差异较大。
+        图表用于观察<b>同一赛道内部的趋势走向与同比变化</b>，跨赛道流量对比请参考下方「赛道热度排行」。
+      </div>
     </div>
 
     <div class="section">
@@ -666,6 +675,25 @@ async function handleCSVFile(file) {
     } catch(err) { status.textContent = '❌ 解析失败：'+err.message; }
   };
   reader.readAsText(file,'UTF-8');
+}
+
+// ── 导入密码保护 ──
+const IMPORT_PWD_HASH = '7c4f6c3a9e2b1d8f5a0c7e4b2d9f6a3c'; // md5("edu2026")的简化版，实际用下面的校验
+function checkImportAuth() {
+  // 已验证过本次会话
+  if (sessionStorage.getItem('import_auth') === 'ok') {
+    document.getElementById('modalImport').classList.add('show');
+    return;
+  }
+  const pwd = prompt('请输入数据导入密码：');
+  if (pwd === null) return;
+  // 简单校验：密码 edu2026
+  if (pwd.trim() === 'edu2026') {
+    sessionStorage.setItem('import_auth', 'ok');
+    document.getElementById('modalImport').classList.add('show');
+  } else {
+    alert('密码错误，请联系数据负责人获取权限。');
+  }
 }
 
 window.onload = () => loadFromSupabase();
