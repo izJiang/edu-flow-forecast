@@ -39,10 +39,10 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .chart-box { height:460px; }
 
 /* 同比（月环比） */
-.yoy-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-.yoy-card { background:#fff; border-radius:12px; padding:14px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.05); text-align:center; }
+.yoy-grid { display:flex; flex-wrap:wrap; gap:8px; }
+.yoy-card { background:#fff; border-radius:999px; padding:7px 18px; box-shadow:0 1px 6px rgba(0,0,0,0.06); display:flex; align-items:center; gap:10px; }
 .yoy-label { font-size:12px; color:#666; margin-bottom:6px; }
-.yoy-value { font-size:22px; font-weight:800; }
+.yoy-value { font-size:15px; font-weight:800; white-space:nowrap; }
 .yoy-value.up { color:#FF2442; }
 .yoy-value.down { color:#00b96b; }
 .yoy-sub { font-size:11px; color:#aaa; margin-top:4px; }
@@ -149,7 +149,7 @@ footer a:hover { text-decoration:underline; }
     </div>
 
     <div class="section">
-      <div class="section-title">同比上月</div>
+      <div class="section-title">同比上年</div>
       <div class="yoy-grid" id="yoyGrid"></div>
     </div>
 
