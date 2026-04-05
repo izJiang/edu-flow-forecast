@@ -577,7 +577,7 @@ async function loadFromSupabase() {
     src && (src.textContent = '⏳ 加载中...');
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
-    const r = await fetch('./data.json?t=' + Date.now(), { signal: controller.signal });
+    const r = await fetch('https://izjiang.github.io/edu-flow-forecast/data.json?t=' + Date.now(), { signal: controller.signal });
     clearTimeout(timer);
     if (!r.ok) throw new Error('http ' + r.status);
     const data = await r.json();
