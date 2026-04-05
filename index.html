@@ -36,7 +36,7 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .section-title::before { content:''; display:block; width:4px; height:18px; background:#FF2442; border-radius:2px; }
 
 .card { background:#fff; border-radius:16px; padding:12px 16px; box-shadow:0 2px 16px rgba(0,0,0,0.06); }
-.chart-box { height:460px; }
+.chart-box { height:460px; transition: opacity 0.25s ease; }
 
 /* 同比（月环比） */
 .yoy-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
@@ -80,6 +80,15 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 
 
 
+
+/* 内容推荐 */
+.content-rec-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.content-rec-card { background:#fff; border-radius:14px; padding:18px; box-shadow:0 2px 10px rgba(0,0,0,0.06); }
+.content-rec-card .rec-tag { display:inline-block; background:#fff0f2; color:#FF2442; border:1px solid #ffcdd3; padding:3px 10px; border-radius:999px; font-size:11px; margin-bottom:8px; font-weight:600; }
+.content-rec-card .rec-title { font-size:14px; font-weight:700; color:#1a1a1a; margin-bottom:6px; line-height:1.5; }
+.content-rec-card .rec-desc { font-size:12px; color:#888; line-height:1.7; margin-bottom:10px; }
+.content-rec-card .rec-link { display:inline-block; font-size:12px; color:#FF2442; text-decoration:none; font-weight:500; }
+.content-rec-card .rec-link:hover { text-decoration:underline; }
 /* 图表说明 */
 .chart-note { font-size:12px; color:#999; margin-top:10px; padding:10px 14px; background:#fafafa; border-radius:8px; line-height:1.7; border-left:3px solid #e0d8d5; }
 .chart-note b { color:#666; }
@@ -142,6 +151,11 @@ footer a:hover { text-decoration:underline; }
     <div class="section">
       <div class="section-title">同比上月</div>
       <div class="yoy-grid" id="yoyGrid"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">本月内容方向推荐</div>
+      <div id="contentRec" class="content-rec-grid"></div>
     </div>
 
     <div class="section">
@@ -285,6 +299,7 @@ function renderChart(track) {
                 .join('<br/>');
       }
     },
+    animation: true, animationDuration: 600, animationEasing: 'cubicOut',
     legend:{ data:['2025同期','2026实际','2026预测'], top:6, textStyle:{fontSize:12} },
     grid:{ top:36, bottom:52, left:12, right:12, containLabel:true },
     xAxis:{
@@ -338,13 +353,18 @@ function renderChart(track) {
   }, true);
 }
 
-function switchTrack(btn, track) {
-  document.querySelectorAll('.track-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  currentTrack = track;
-  renderChart(track);
-  renderTiming(track);
-  renderIntel(track);
+function switchTrack(name) {
+  currentTrack = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.track === name));
+  const box = document.getElementById('chart1');
+  box.style.opacity = '0';
+  setTimeout(function() {
+    renderChart(name);
+    box.style.opacity = '1';
+  }, 180);
+  renderContent(name);
+  renderTiming(name);
+  renderIntel(name);
 }
 
 function renderYOY() {
@@ -398,6 +418,62 @@ function renderIntel(track) {
 }
 
 
+
+const contentRecs = {
+  "K12学科辅导": [
+    {"tag":"冲刺干货","title":"期中考试高分技巧","kw":"期中考试技巧"},
+    {"tag":"择校攻略","title":"机构选择避坑指南","kw":"学科辅导机构怎么选"},
+    {"tag":"家长干货","title":"孩子成绩下滑怎么办","kw":"孩子成绩下滑"}
+  ],
+  "大语文": [
+    {"tag":"阅读推荐","title":"世界读书日书单合辑","kw":"世界读书日书单"},
+    {"tag":"写作提升","title":"作文高分句式收藏","kw":"小学作文高分句式"},
+    {"tag":"古诗文","title":"期中必背古诗文速记","kw":"小学古诗文速记"}
+  ],
+  "STEM": [
+    {"tag":"竞赛备战","title":"蓝桥杯备考经验分享","kw":"蓝桥杯备考"},
+    {"tag":"编程入门","title":"少儿编程怎么入门","kw":"少儿编程入门"},
+    {"tag":"科学实验","title":"在家做的有趣科学实验","kw":"亲子科学实验"}
+  ],
+  "素质教育": [
+    {"tag":"艺术启蒙","title":"孩子学画画/钢琴哪个好","kw":"孩子学才艺选择"},
+    {"tag":"演出攻略","title":"春季汇演穿搭造型","kw":"儿童演出穿搭"},
+    {"tag":"兴趣培养","title":"如何找到孩子的兴趣点","kw":"如何培养孩子兴趣"}
+  ],
+  "英语/语言": [
+    {"tag":"口语提升","title":"英语口语速成30天","kw":"英语口语30天"},
+    {"tag":"考试攻略","title":"KET/PET高分备考路线","kw":"KET备考攻略"},
+    {"tag":"绘本推荐","title":"英文绘本分级推荐","kw":"英文绘本分级"}
+  ],
+  "教辅工具": [
+    {"tag":"工具测评","title":"学习机器人横评2026","kw":"学习机器人推荐"},
+    {"tag":"效率方法","title":"错题本怎么做才有用","kw":"错题本方法"},
+    {"tag":"文具好物","title":"五一囤货文具清单","kw":"文具好物推荐"}
+  ],
+  "考研": [
+    {"tag":"复试冲刺","title":"复试英语口试高频题","kw":"考研复试英语口试"},
+    {"tag":"院校选择","title":"调剂院校信息汇总","kw":"考研调剂院校2026"},
+    {"tag":"备考规划","title":"2027考研备考时间线","kw":"2027考研备考计划"}
+  ],
+  "公考/事业编": [
+    {"tag":"笔试冲刺","title":"行测数量关系快速解题","kw":"行测数量关系技巧"},
+    {"tag":"省考备战","title":"省考真题刷题规划","kw":"省考真题刷题"},
+    {"tag":"上岸经验","title":"半年上岸公务员经验","kw":"公务员考试上岸经验"}
+  ]
+};
+
+function renderContent(track) {
+  const recs = contentRecs[track] || [];
+  document.getElementById('contentRec').innerHTML = recs.map(function(r) {
+    const url = 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(r.kw) + '&source=web_search_result_notes';
+    return '<div class="content-rec-card">'
+      + '<div class="rec-tag">' + r.tag + '</div>'
+      + '<div class="rec-title">' + r.title + '</div>'
+      + '<div class="rec-desc">点击查看小红书相关内容 →</div>'
+      + '<a class="rec-link" href="' + url + '" target="_blank">🔍 搜「' + r.kw + '」</a>'
+      + '</div>';
+  }).join('');
+}
 
 // ── 导入 CSV ──
 function handleCSVFile(file) {
@@ -547,7 +623,7 @@ async function loadFromSupabase() {
     REAL_DATA = FALLBACK_DATA;
     src && (src.textContent = '📦 内置数据');
   }
-  initChart(); renderYOY(); renderHeat(); renderTiming(currentTrack); renderIntel(currentTrack);
+  initChart(); renderYOY(); renderHeat(); renderContent(currentTrack); renderTiming(currentTrack); renderIntel(currentTrack);
 }
 
 // ── 上传行到 Supabase ──
