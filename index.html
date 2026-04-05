@@ -39,13 +39,14 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .chart-box { height:460px; }
 
 /* 同比（月环比） */
-.yoy-grid { display:flex; flex-wrap:wrap; gap:8px; }
-.yoy-card { background:#fff; border-radius:999px; padding:7px 18px; box-shadow:0 1px 6px rgba(0,0,0,0.06); display:flex; align-items:center; gap:10px; }
-.yoy-label { font-size:12px; color:#666; margin-bottom:6px; }
-.yoy-value { font-size:15px; font-weight:800; white-space:nowrap; }
+.yoy-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.yoy-card { background:#fff; border-radius:12px; padding:14px 16px; box-shadow:0 1px 8px rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:space-between; }
+.yoy-label { font-size:13px; color:#666; font-weight:500; }
+.yoy-value { font-size:20px; font-weight:800; line-height:1; }
 .yoy-value.up { color:#FF2442; }
 .yoy-value.down { color:#00b96b; }
-.yoy-sub { font-size:11px; color:#aaa; margin-top:4px; }
+.yoy-right { text-align:right; }
+.yoy-sub { font-size:11px; color:#bbb; margin-top:3px; }
 
 /* 投放时机 */
 .timing-card { background:#fff; border-radius:16px; padding:24px; box-shadow:0 2px 16px rgba(0,0,0,0.06); }
@@ -364,13 +365,13 @@ function switchTrack(el, name) {
 
 function renderYOY() {
   document.getElementById('yoyGrid').innerHTML = Object.entries(REAL_DATA).map(([name,d])=>{
-    const pct = d.yoy;  // 真同比：2026实际 vs 2025同期
-    return `
-    <div class="yoy-card">
-      <div class="yoy-label">${name}</div>
-      <div class="yoy-value ${pct>=0?'up':'down'}">${pct>=0?'+':''}${pct}%</div>
-      <div class="yoy-sub">vs 2025同期</div>
-    </div>`;
+    const pct = d.yoy;
+    return '<div class="yoy-card">'
+      + '<div class="yoy-label">' + name + '</div>'
+      + '<div class="yoy-right">'
+      + '<div class="yoy-value ' + (pct>=0?'up':'down') + '">' + (pct>=0?'+':'') + pct + '%</div>'
+      + '<div class="yoy-sub">vs 2025同期</div>'
+      + '</div></div>';
   }).join('');
 }
 
