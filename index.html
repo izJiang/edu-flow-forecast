@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>教育赛道流量预测 · 小红书</title>
-<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC',sans-serif; }
@@ -36,14 +35,14 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .section-title { font-size:16px; font-weight:700; color:#1a1a1a; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
 .section-title::before { content:''; display:block; width:4px; height:18px; background:#FF2442; border-radius:2px; }
 
-.card { background:#fff; border-radius:16px; padding:24px; box-shadow:0 2px 16px rgba(0,0,0,0.06); }
-.chart-box { height:320px; }
+.card { background:#fff; border-radius:16px; padding:16px 20px; box-shadow:0 2px 16px rgba(0,0,0,0.06); }
+.chart-box { height:420px; }
 
 /* 同比（月环比） */
-.yoy-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
-.yoy-card { background:#fff; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06); text-align:center; }
+.yoy-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.yoy-card { background:#fff; border-radius:12px; padding:14px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.05); text-align:center; }
 .yoy-label { font-size:12px; color:#666; margin-bottom:6px; }
-.yoy-value { font-size:26px; font-weight:800; }
+.yoy-value { font-size:22px; font-weight:800; }
 .yoy-value.up { color:#FF2442; }
 .yoy-value.down { color:#00b96b; }
 .yoy-sub { font-size:11px; color:#aaa; margin-top:4px; }
@@ -79,6 +78,15 @@ body { background:#f8f4f2; color:#1a1a1a; font-family:-apple-system,'PingFang SC
 .intel-quote { margin-top:14px; padding:12px 16px; background:#fff8f0; border-radius:10px; font-size:13px; color:#666; line-height:1.8; border-left:3px solid #FF2442; }
 .tag { display:inline-block; background:#fff0f2; color:#FF2442; padding:4px 12px; border-radius:999px; font-size:12px; margin:3px; }
 
+
+/* 内容推荐 */
+.content-rec-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.content-rec-card { background:#fff; border-radius:14px; padding:18px; box-shadow:0 2px 10px rgba(0,0,0,0.06); }
+.content-rec-card .rec-tag { display:inline-block; background:#fff0f2; color:#FF2442; border:1px solid #ffcdd3; padding:3px 10px; border-radius:999px; font-size:11px; margin-bottom:8px; font-weight:600; }
+.content-rec-card .rec-title { font-size:14px; font-weight:700; color:#1a1a1a; margin-bottom:6px; line-height:1.5; }
+.content-rec-card .rec-desc { font-size:12px; color:#888; line-height:1.7; margin-bottom:10px; }
+.content-rec-card .rec-link { display:inline-block; font-size:12px; color:#FF2442; text-decoration:none; font-weight:500; }
+.content-rec-card .rec-link:hover { text-decoration:underline; }
 /* 图表说明 */
 .chart-note { font-size:12px; color:#999; margin-top:10px; padding:10px 14px; background:#fafafa; border-radius:8px; line-height:1.7; border-left:3px solid #e0d8d5; }
 .chart-note b { color:#666; }
@@ -134,9 +142,7 @@ footer a:hover { text-decoration:underline; }
       <div class="section-title">流量趋势预测</div>
       <div class="card"><div id="chart1" class="chart-box"></div></div>
       <div class="chart-note">
-        💡 <b>阅读说明：</b>各赛道 Y 轴范围独立自适应，切换赛道时绝对数值不可直接比较大小——
-        这是正常现象，因为不同赛道的消耗体量本身差异较大。
-        图表用于观察<b>同一赛道内部的趋势走向与同比变化</b>，跨赛道流量对比请参考下方「赛道热度排行」。
+        💡 各赛道 Y 轴独立，绝对数值<b>不可跨赛道比较</b>。跨赛道流量对比看下方「赛道热度排行」。
       </div>
     </div>
 
@@ -148,6 +154,11 @@ footer a:hover { text-decoration:underline; }
     <div class="section">
       <div class="section-title">赛道热度排行</div>
       <div class="heat-grid" id="heatGrid"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">本月内容方向推荐</div>
+      <div id="contentRec" class="content-rec-grid"></div>
     </div>
 
     <div class="section">
@@ -348,19 +359,19 @@ function switchTrack(btn, track) {
   btn.classList.add('active');
   currentTrack = track;
   renderChart(track);
+  renderContent(track);
   renderTiming(track);
   renderIntel(track);
 }
 
 function renderYOY() {
   document.getElementById('yoyGrid').innerHTML = Object.entries(REAL_DATA).map(([name,d])=>{
-    const mom = calcMoM(d);
-    const pct = mom.pct;
+    const pct = d.yoy;  // 真同比：2026实际 vs 2025同期
     return `
     <div class="yoy-card">
       <div class="yoy-label">${name}</div>
       <div class="yoy-value ${pct>=0?'up':'down'}">${pct>=0?'+':''}${pct}%</div>
-      <div class="yoy-sub">vs 展示期前半段</div>
+      <div class="yoy-sub">vs 2025同期</div>
     </div>`;
   }).join('');
 }
@@ -376,34 +387,34 @@ function renderHeat() {
 
   const rankClass = i => i===0?'':'rank'+(i===1?'2':i===2?'3':'N');
 
-  document.getElementById('heatGrid').innerHTML = `
-    <div class="heat-card">
-      <h4>📈 同比增速排行（vs 2025同期）</h4>
-      ${byYoy.map((name,i)=>{
-        const yoy = REAL_DATA[name].yoy;
-        const w = Math.round(Math.abs(yoy)/maxYoy*100);
-        return `<div class="heat-row">
-          <div class="heat-rank \${rankClass(i)}">\${i+1}</div>
-          <div class="heat-name">\${name}</div>
-          <div class="heat-bar-wrap"><div class="heat-bar" style="width:\${w}%"></div></div>
-          <div class="heat-val">+\${yoy}%</div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="heat-card">
-      <h4>🔄 近期环比排行（近期 vs 早期）</h4>
-      ${byMom.map((name,i)=>{
-        const mom = calcMoM(REAL_DATA[name]);
-        const w = maxMom>0?Math.round(Math.abs(mom.pct)/maxMom*100):0;
-        const sign = mom.pct>=0?'+':'';
-        return `<div class="heat-row">
-          <div class="heat-rank \${rankClass(i)}">\${i+1}</div>
-          <div class="heat-name">\${name}</div>
-          <div class="heat-bar-wrap"><div class="heat-bar" style="width:\${w}%;background:\${mom.pct<0?'linear-gradient(90deg,#aaa,#ccc)':'linear-gradient(90deg,#FF2442,#ff7875)'}"></div></div>
-          <div class="heat-val" style="color:\${mom.pct>=0?'#FF2442':'#aaa'}">\${sign}\${mom.pct}%</div>
-        </div>`;
-      }).join('')}
-    </div>`;
+  const yoyRows = byYoy.map((name,i) => {
+    const yoy = REAL_DATA[name].yoy;
+    const w = Math.round(Math.abs(yoy)/maxYoy*100);
+    return '<div class="heat-row">'
+      + '<div class="heat-rank ' + rankClass(i) + '">' + (i+1) + '</div>'
+      + '<div class="heat-name">' + name + '</div>'
+      + '<div class="heat-bar-wrap"><div class="heat-bar" style="width:' + w + '%"></div></div>'
+      + '<div class="heat-val">+' + yoy + '%</div>'
+      + '</div>';
+  }).join('');
+
+  const momRows = byMom.map((name,i) => {
+    const mom = calcMoM(REAL_DATA[name]);
+    const w = maxMom>0?Math.round(Math.abs(mom.pct)/maxMom*100):0;
+    const sign = mom.pct>=0?'+':'';
+    const barBg = mom.pct<0?'linear-gradient(90deg,#aaa,#ccc)':'linear-gradient(90deg,#FF2442,#ff7875)';
+    const valColor = mom.pct>=0?'#FF2442':'#aaa';
+    return '<div class="heat-row">'
+      + '<div class="heat-rank ' + rankClass(i) + '">' + (i+1) + '</div>'
+      + '<div class="heat-name">' + name + '</div>'
+      + '<div class="heat-bar-wrap"><div class="heat-bar" style="width:' + w + '%;background:' + barBg + '"></div></div>'
+      + '<div class="heat-val" style="color:' + valColor + '">' + sign + mom.pct + '%</div>'
+      + '</div>';
+  }).join('');
+
+  document.getElementById('heatGrid').innerHTML =
+    '<div class="heat-card"><h4>📈 同比增速排行（vs 2025同期）</h4>' + yoyRows + '</div>'
+    + '<div class="heat-card"><h4>🔄 近期环比排行（近期 vs 早期）</h4>' + momRows + '</div>';
 }
 
 function renderTiming(track) {
@@ -440,6 +451,62 @@ function renderIntel(track) {
       <div style="margin-top:12px">${nodes.map(n=>`<span class="tag">${n}</span>`).join('')}</div>
     </div>
   `;
+}
+
+const contentRecs = {
+  'K12学科辅导': [
+    {tag:'冲刺干货', title:'期中考试高分技巧', kw:'期中考试技巧'},
+    {tag:'择校攻略', title:'机构选择避坑指南', kw:'学科辅导机构怎么选'},
+    {tag:'家长干货', title:'孩子成绩下滑怎么办', kw:'孩子成绩下滑'},
+  ],
+  '大语文': [
+    {tag:'阅读推荐', title:'世界读书日书单合辑', kw:'世界读书日书单'},
+    {tag:'写作提升', title:'作文高分句式收藏', kw:'小学作文高分句式'},
+    {tag:'古诗文', title:'期中必背古诗文速记', kw:'小学古诗文速记'},
+  ],
+  'STEM': [
+    {tag:'竞赛备战', title:'蓝桥杯备考经验分享', kw:'蓝桥杯备考'},
+    {tag:'编程入门', title:'少儿编程怎么入门', kw:'少儿编程入门'},
+    {tag:'科学实验', title:'在家做的有趣科学实验', kw:'亲子科学实验'},
+  ],
+  '素质教育': [
+    {tag:'艺术启蒙', title:'孩子学画画/钢琴哪个好', kw:'孩子学才艺选择'},
+    {tag:'演出攻略', title:'春季汇演穿搭造型', kw:'儿童演出穿搭'},
+    {tag:'兴趣培养', title:'如何找到孩子的兴趣点', kw:'如何培养孩子兴趣'},
+  ],
+  '英语/语言': [
+    {tag:'口语提升', title:'英语口语速成30天', kw:'英语口语30天'},
+    {tag:'考试攻略', title:'KET/PET高分备考路线', kw:'KET备考攻略'},
+    {tag:'绘本推荐', title:'英文绘本分级推荐', kw:'英文绘本分级'},
+  ],
+  '教辅工具': [
+    {tag:'工具测评', title:'学习机器人横评2026', kw:'学习机器人推荐'},
+    {tag:'效率方法', title:'错题本怎么做才有用', kw:'错题本方法'},
+    {tag:'文具好物', title:'五一囤货文具清单', kw:'文具好物推荐'},
+  ],
+  '考研': [
+    {tag:'复试冲刺', title:'复试英语口试高频题', kw:'考研复试英语口试'},
+    {tag:'院校选择', title:'调剂院校信息汇总', kw:'考研调剂院校2026'},
+    {tag:'备考规划', title:'2027考研备考时间线', kw:'2027考研备考计划'},
+  ],
+  '公考/事业编': [
+    {tag:'笔试冲刺', title:'行测数量关系快速解题', kw:'行测数量关系技巧'},
+    {tag:'省考备战', title:'省考真题刷题规划', kw:'省考真题刷题'},
+    {tag:'上岸经验', title:'半年上岸公务员经验', kw:'公务员考试上岸经验'},
+  ],
+};
+
+function renderContent(track) {
+  const recs = contentRecs[track] || [];
+  document.getElementById('contentRec').innerHTML = recs.map(r => {
+    const url = 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(r.kw) + '&source=web_search_result_notes';
+    return '<div class="content-rec-card">'
+      + '<div class="rec-tag">' + r.tag + '</div>'
+      + '<div class="rec-title">' + r.title + '</div>'
+      + '<div class="rec-desc">点击查看小红书相关内容 →</div>'
+      + '<a class="rec-link" href="' + url + '" target="_blank">🔍 搜「' + r.kw + '」</a>'
+      + '</div>';
+  }).join('');
 }
 
 // ── 导入 CSV ──
@@ -574,9 +641,23 @@ let REAL_DATA = FALLBACK_DATA;
 // ── Supabase 加载 ──
 async function loadFromSupabase() {
   const src = document.getElementById('dataSource');
-  REAL_DATA = FALLBACK_DATA;
-  src && (src.textContent = '✅ 最新数据');
-  initChart(); renderYOY(); renderHeat(); renderTiming(currentTrack); renderIntel(currentTrack);
+  try {
+    src && (src.textContent = '⏳ 加载中...');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const r = await fetch('https://izjiang.github.io/edu-flow-forecast/data.json?t=' + Date.now(), { signal: controller.signal });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error('http ' + r.status);
+    const data = await r.json();
+    if (!data || !Object.keys(data).length) throw new Error('空数据');
+    REAL_DATA = data;
+    src && (src.textContent = '✅ 最新数据');
+  } catch(e) {
+    console.warn('data.json 加载失败，用内置数据:', e.message);
+    REAL_DATA = FALLBACK_DATA;
+    src && (src.textContent = '📦 内置数据');
+  }
+  initChart(); renderYOY(); renderHeat(); renderContent(currentTrack); renderTiming(currentTrack); renderIntel(currentTrack);
 }
 
 // ── 上传行到 Supabase ──
