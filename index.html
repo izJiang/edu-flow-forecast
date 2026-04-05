@@ -154,7 +154,7 @@ footer a:hover { text-decoration:underline; }
     </div>
 
     <div class="section">
-      <div class="section-title">本月内容方向推荐</div>
+      <div class="section-title">近期内容方向推荐</div>
       <div id="contentRec" class="content-rec-grid"></div>
     </div>
 
@@ -224,11 +224,11 @@ const hotNodes = {
 };
 
 const briefs = {
-  'K12学科辅导': '本月处于期中备考冲刺期，流量持续走高，建议4月20日后集中投放，五一节前预热尤为关键。',
+  'K12学科辅导': '当前处于期中备考冲刺期，流量持续走高，建议4月20日后集中投放，五一节前预热尤为关键。',
   '大语文':      '世界读书日(4/23)带动阅读写作热度，流量稳步上升，适合内容营销配合投放。',
   'STEM':        '蓝桥杯省赛临近，编程赛道热度显著，同比涨幅低但稳健，适合精准人群投放。',
   '素质教育':    '春季汇演季带动乐器、舞蹈需求，整体平稳，可配合节日营销节点投放。',
-  '英语/语言':   '英语考试季叠加高考备考，流量增速最高，是本月最具竞争力的赛道。',
+  '英语/语言':   '英语考试季叠加高考备考，流量增速最高，是当前最具竞争力的赛道。',
   '教辅工具':    '五一促销预热期，教辅硬件需求攀升，建议4月底提前布局，把握节前窗口。',
   '考研':        '复试季高峰(4月中)流量明显，之后进入备考淡季，建议精准把握复试窗口期。',
   '公考/事业编': '省考独立省份笔试(4月中)拉动流量，此后波动较大，建议结合具体考试日程灵活调整。',
@@ -401,7 +401,7 @@ function renderIntel(track) {
   const mom = calcMoM(d);
   document.getElementById('intelGrid').innerHTML = `
     <div class="intel-card">
-      <h3>🎯 ${track} · 本月情报</h3>
+      <h3>🎯 ${track} · 近期情报</h3>
       <div class="intel-row"><span class="key">同比增速</span><span class="val">${yoy>=0?'📈 +':'📉 '}${yoy}% vs 2025同期</span></div>
       <div class="intel-row"><span class="key">近期环比</span><span class="val">${mom.pct>=0?'⬆️ +':'⬇️ '}${mom.pct}%</span></div>
       <div class="intel-row"><span class="key">同比系数</span><span class="val">${coef}x</span></div>
@@ -410,7 +410,7 @@ function renderIntel(track) {
       <div class="intel-quote">${briefs[track]}</div>
     </div>
     <div class="intel-card">
-      <h3>📅 本月重点节点</h3>
+      <h3>📅 近期重点节点</h3>
       ${nodes.map(n=>`<div class="intel-row"><span class="key">📌</span><span class="val">${n}</span></div>`).join('')}
       <div style="margin-top:12px">${nodes.map(n=>`<span class="tag">${n}</span>`).join('')}</div>
     </div>
