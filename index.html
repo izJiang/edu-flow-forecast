@@ -152,8 +152,9 @@ footer a:hover { text-decoration:underline; }
     </div>
 
     <div class="section">
-      <div class="section-title">同比上年</div>
+      <div class="section-title">4月预测增速 <span style="font-size:12px;color:#aaa;font-weight:400;">· vs 3月实际均值（纯预测段 4/5 起）</span></div>
       <div class="yoy-grid" id="yoyGrid"></div>
+      <div class="chart-note" style="margin-top:12px;">📉 <b>考研、英语/语言</b>预测为负增长，属正常季节性回落——3月为备考冲刺旺季（成绩发布/报录比查询），4月进入备考平台期，流量自然回撤，非赛道衰退信号。</div>
     </div>
 
     <div class="section">
@@ -368,13 +369,24 @@ function switchTrack(el, name) {
 }
 
 function renderYOY() {
+  const avg = arr => arr.reduce((a,b)=>a+b,0)/arr.length;
   document.getElementById('yoyGrid').innerHTML = Object.entries(REAL_DATA).map(([name,d])=>{
-    const pct = d.yoy;
+    const mar_avg = d.y2026_actual && d.y2026_actual.length
+      ? avg(d.y2026_actual.map(p=>p.y))
+      : null;
+    const forecast = d.y2026_forecast ? d.y2026_forecast.slice(1) : []; // 去掉首个重叠点
+    const apr_forecast_avg = forecast.length ? avg(forecast.map(p=>p.y)) : null;
+    let pct = null;
+    if (mar_avg && apr_forecast_avg) {
+      pct = Math.round((apr_forecast_avg - mar_avg) / mar_avg * 1000) / 10;
+    } else {
+      pct = d.yoy; // fallback
+    }
     return '<div class="yoy-card">'
       + '<div class="yoy-label">' + name + '</div>'
       + '<div class="yoy-right">'
       + '<div class="yoy-value ' + (pct>=0?'up':'down') + '">' + (pct>=0?'+':'') + pct + '%</div>'
-      + '<div class="yoy-sub">vs 2025同期</div>'
+      + '<div class="yoy-sub">4月预测 vs 3月实际</div>'
       + '</div></div>';
   }).join('');
 }
@@ -388,7 +400,7 @@ function renderTiming(track) {
   const forecastPeak = d.y2026_forecast.reduce((a,b)=>b.y>a.y?b:a,{x:'--',y:0});
   document.getElementById('timingCard').innerHTML = `
     <div>${nodes.map(n=>`<span class="peak-badge">📅 ${n}</span>`).join('')}</div>
-    <div class="timing-tip">预计 <span>${forecastPeak.x}</span> 前后流量达到峰值，建议提前 <span>3天</span> 加大预算。当前同比 ${yoy>=0?'<span>+'+yoy+'%</span> 📈，建议保持或加大投放。':'<span style="color:#999">'+yoy+'%</span> 📉，建议精准投放控制成本。'}</div>
+    <div class="timing-tip">预计 <span>${forecastPeak.x}</span> 前后流量达到峰值，建议提前 <span>3天</span> 加大预算。4月预测较3月 ${yoy>=0?'<span>+'+yoy+'%</span> 📈，建议保持或加大投放。':'<span style="color:#999">'+yoy+'%</span> 📉，建议精准投放控制成本。'}</div>
   `;
 }
 
@@ -402,7 +414,7 @@ function renderIntel(track) {
   document.getElementById('intelGrid').innerHTML = `
     <div class="intel-card">
       <h3>🎯 ${track} · 近期情报</h3>
-      <div class="intel-row"><span class="key">同比增速</span><span class="val">${yoy>=0?'📈 +':'📉 '}${yoy}% vs 2025同期</span></div>
+      <div class="intel-row"><span class="key">4月预测增速</span><span class="val">${mom.pct>=0?'📈 +':'📉 '}${mom.pct}% vs 3月实际</span></div>
       <div class="intel-row"><span class="key">近期环比</span><span class="val">${mom.pct>=0?'⬆️ +':'⬇️ '}${mom.pct}%</span></div>
       <div class="intel-row"><span class="key">同比系数</span><span class="val">${coef}x</span></div>
       <div class="intel-row"><span class="key">预测峰值日</span><span class="val">${forecastPeak.x}</span></div>
