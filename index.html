@@ -396,11 +396,19 @@ function renderHeat() { /* removed */ }
 function renderTiming(track) {
   const d = REAL_DATA[track];
   const nodes = hotNodes[track];
-  const yoy = d.yoy;
+  const avg = arr => arr.reduce((a,b)=>a+b,0)/arr.length;
+  const mar_avg = d.y2026_actual && d.y2026_actual.length ? avg(d.y2026_actual.map(p=>p.y)) : null;
+  const forecast = d.y2026_forecast ? d.y2026_forecast.slice(1) : [];
+  const apr_forecast_avg = forecast.length ? avg(forecast.map(p=>p.y)) : null;
+  const momPct = (mar_avg && apr_forecast_avg) ? Math.round((apr_forecast_avg - mar_avg) / mar_avg * 1000) / 10 : null;
   const forecastPeak = d.y2026_forecast.reduce((a,b)=>b.y>a.y?b:a,{x:'--',y:0});
+  const trendTip = momPct === null ? '' :
+    momPct >= 0
+      ? `4月预测较3月 <span>+${momPct}%</span> 📈，建议提前 <span>3天</span> 加大预算。`
+      : `4月预测较3月 <span style="color:#999">${momPct}%</span> 📉，流量季节性回落，建议维持现有预算、精准投放控制成本。`;
   document.getElementById('timingCard').innerHTML = `
     <div>${nodes.map(n=>`<span class="peak-badge">📅 ${n}</span>`).join('')}</div>
-    <div class="timing-tip">预计 <span>${forecastPeak.x}</span> 前后流量达到峰值，建议提前 <span>3天</span> 加大预算。4月预测较3月 ${yoy>=0?'<span>+'+yoy+'%</span> 📈，建议保持或加大投放。':'<span style="color:#999">'+yoy+'%</span> 📉，建议精准投放控制成本。'}</div>
+    <div class="timing-tip">预计 <span>${forecastPeak.x}</span> 前后流量达到峰值。${trendTip}</div>
   `;
 }
 
@@ -418,7 +426,7 @@ function renderIntel(track) {
       <div class="intel-row"><span class="key">近期环比</span><span class="val">${mom.pct>=0?'⬆️ +':'⬇️ '}${mom.pct}%</span></div>
       <div class="intel-row"><span class="key">同比系数</span><span class="val">${coef}x</span></div>
       <div class="intel-row"><span class="key">预测峰值日</span><span class="val">${forecastPeak.x}</span></div>
-      <div class="intel-row"><span class="key">建议动作</span><span class="val">${yoy>=0?'💪 加大预算':'🎯 精准投放'}</span></div>
+      <div class="intel-row"><span class="key">建议动作</span><span class="val">${mom.pct>=0?'💪 加大预算':'🎯 精准投放控成本'}</span></div>
       <div class="intel-quote">${briefs[track]}</div>
     </div>
     <div class="intel-card">
