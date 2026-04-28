@@ -405,23 +405,24 @@ function renderYOY() {
     { label:'成人学历', tracks:['考研','保研','公考/事业编'] },
     { label:'教辅工具', tracks:['教辅工具'] },
   ];
-  let html = '';
-  groups.forEach(g => {
-    // 分组标题行（占满4列）
-    html += '<div class="yoy-group-header" style="grid-column:1/-1;font-size:11px;font-weight:700;color:#bbb;letter-spacing:0.08em;padding:4px 2px 0;margin-top:4px;">' + g.label + '</div>';
-    g.tracks.forEach(name => {
+  let out = '';
+  groups.forEach(function(g) {
+    out += '<div class="yoy-group-header" style="grid-column:1/-1;font-size:11px;font-weight:700;color:#bbb;letter-spacing:0.08em;padding:4px 2px 0;margin-top:4px;">' + g.label + '</div>';
+    g.tracks.forEach(function(name) {
       const d = REAL_DATA[name];
       if (!d) return;
       const pct = d.yoy;
-      html += '<div class="yoy-card" style="cursor:pointer;" onclick="document.querySelector('[onclick*=\"' + name.replace('/','\\/'). replace('"','\\"') + '\"\]').click()">'
+      const upClass = pct >= 0 ? 'up' : 'down';
+      const sign = pct >= 0 ? '+' : '';
+      out += '<div class="yoy-card">'
         + '<div class="yoy-label">' + name + '</div>'
         + '<div class="yoy-right">'
-        + '<div class="yoy-value ' + (pct>=0?'up':'down') + '">' + (pct>=0?'+':'') + pct + '%</div>'
+        + '<div class="yoy-value ' + upClass + '">' + sign + pct + '%</div>'
         + '<div class="yoy-sub">vs 2025同期</div>'
         + '</div></div>';
     });
   });
-  document.getElementById('yoyGrid').innerHTML = html;
+  document.getElementById('yoyGrid').innerHTML = out;
 }
 
 function renderHeat() { /* removed */ }
